@@ -24,7 +24,7 @@
     "views": {
       "leetml-container": [
         {
-          "id": "leetml-view",
+          "id": "main",
           "name": "LeetML",
           "icon": "./resources/icons/leetml.png"
         }
