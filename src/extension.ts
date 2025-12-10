@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import TreeDataProvider from './provider/treeDataProvider';
 import { DocumentService } from './service/documentService';
+import { EditCodeService } from './service/editCodeService';
 
 export function activate(context: vscode.ExtensionContext) {
 	console.log('Congratulations, your extension "leetml" is now active!');
@@ -12,7 +13,10 @@ export function activate(context: vscode.ExtensionContext) {
 	);
 	context.subscriptions.push(treeView);
 
-	const documentService = new DocumentService(context.extensionPath);
+	const editCodeService = new EditCodeService();
+	const documentService = new DocumentService(context.extensionPath, editCodeService);
+	editCodeService.setDocumentService(documentService);
+
 	const openDocCommand = vscode.commands.registerCommand(
 		'leetml.openDocument',
 		async (docName: string) => {
@@ -21,10 +25,17 @@ export function activate(context: vscode.ExtensionContext) {
 	);
 	context.subscriptions.push(openDocCommand);
 
-	const helloWorldCommand = vscode.commands.registerCommand('leetml.helloWorld', () => {
-		vscode.window.showInformationMessage('Hello World from LeetML!');
+	const executeSectionCommand = vscode.commands.registerCommand(
+		'leetml.executeSectionCommand',
+		async (mainTitle: string, sectionTitle: string) => {
+		    await editCodeService.editCode(mainTitle, sectionTitle);
+	    }
+    );
+	context.subscriptions.push(executeSectionCommand);
+
+	context.subscriptions.push({
+		dispose: () => editCodeService.dispose()
 	});
-	context.subscriptions.push(helloWorldCommand);
 }
 
 export function deactivate() {}

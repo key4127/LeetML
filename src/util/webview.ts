@@ -1,5 +1,34 @@
-export function getHtmlForWebview(markdownContent: string): string {
-    const htmlContent = convertMarkdownToHtml(markdownContent);
+export function getHtmlForWebview(markdownContent: string, includeButtons: boolean = false, docName?: string): string {
+    const htmlContent = convertMarkdownToHtml(markdownContent, includeButtons);
+
+    let scriptTag = '';
+    if (includeButtons) {
+        scriptTag = `<script>
+                function executeCommand(sectionTitle) {
+                    try {
+                        // 获取一级标题
+                        const h1Element = document.querySelector('h1');
+                        const mainTitle = h1Element ? h1Element.textContent : '';
+
+                        // 获取文档名称
+                        const bodyElement = document.querySelector('body');
+                        const docName = bodyElement ? bodyElement.getAttribute('data-docname') : '';
+
+                        // 调用VS Code命令
+                        const vscode = window.acquireVsCodeApi();
+                        vscode.postMessage({
+                            command: 'executeSectionCommand',
+                            mainTitle: mainTitle,
+                            sectionTitle: sectionTitle,
+                            docName: docName
+                        });
+                    } catch (error) {
+                        console.error('Error in executeCommand:', error);
+                    }
+                }
+            </script>`;
+    }
+
     return `<!DOCTYPE html>
         <html>
         <head>
@@ -96,53 +125,49 @@ export function getHtmlForWebview(markdownContent: string): string {
                 }
             </style>
         </head>
-        <body>
+        <body data-docname="${docName || ''}">
             ${htmlContent}
+            ${scriptTag}
         </body>
         </html>`;
 }
 
-export function convertMarkdownToHtml(markdownContent: string): string {
+export function convertMarkdownToHtml(markdownContent: string, includeButtons: boolean = false): string {
     if (!markdownContent) return '';
 
     let html = markdownContent;
 
-    // 转义HTML标签
     html = html.replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
-    // 处理代码块 (```)
     html = html.replace(/```([\s\S]*?)```/g, (match, code) => {
         return `<pre><code>${code}</code></pre>`;
     });
 
-    // 处理内联代码 (`)
     html = html.replace(/`([^`\n]+)`/g, (match, code) => {
         return `<code>${code}</code>`;
     });
 
-    // 处理标题 (# ## ### #### ##### ######)
     html = html.replace(/^###### (.*$)/gim, '<h6>$1</h6>');
     html = html.replace(/^##### (.*$)/gim, '<h5>$1</h5>');
     html = html.replace(/^#### (.*$)/gim, '<h4>$1</h4>');
     html = html.replace(/^### (.*$)/gim, '<h3>$1</h3>');
-    html = html.replace(/^## (.*$)/gim, '<h2>$1</h2>');
+    if (includeButtons) {
+        html = html.replace(/^## (.*$)/gim, '<h2>$1</h2><div style="text-align: right; margin-bottom: 16px;"><button onclick="executeCommand(\'$1\')" style="background-color: var(--vscode-button-background); color: var(--vscode-button-foreground); border: 1px solid var(--vscode-button-border); padding: 4px 8px; border-radius: 3px; cursor: pointer;">执行</button></div>');
+    } else {
+        html = html.replace(/^## (.*$)/gim, '<h2>$1</h2>');
+    }
     html = html.replace(/^# (.*$)/gim, '<h1>$1</h1>');
 
-    // 处理粗体 (**text** 或 __text__)
     html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
     html = html.replace(/__(.*?)__/g, '<strong>$1</strong>');
 
-    // 处理斜体 (*text* 或 _text_)
     html = html.replace(/\*([^*\n]+)\*/g, '<em>$1</em>');
     html = html.replace(/_([^_\n]+)_/g, '<em>$1</em>');
 
-    // 处理链接 [text](url)
     html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2">$1</a>');
 
-    // 处理引用块 (> text)
     html = html.replace(/^> (.*$)/gim, '<blockquote>$1</blockquote>');
 
-    // 处理无序列表 (- item 或 * item)
     const listRegex = /^(\s*)([-*])\s+(.*)$/gm;
     let inList = false;
     let listLevel = 0;
@@ -177,7 +202,6 @@ export function convertMarkdownToHtml(markdownContent: string): string {
         html += '\n</ul>';
     }
 
-    // 处理有序列表 (1. item)
     const orderedListRegex = /^(\s*)(\d+)\.\s+(.*)$/gm;
     let inOrderedList = false;
     let orderedListLevel = 0;
@@ -212,7 +236,6 @@ export function convertMarkdownToHtml(markdownContent: string): string {
         html += '\n</ol>';
     }
 
-    // 处理段落（将连续的非空行包装在<p>标签中）
     const lines = html.split('\n');
     const processedLines: string[] = [];
     let paragraphBuffer: string[] = [];
@@ -238,10 +261,8 @@ export function convertMarkdownToHtml(markdownContent: string): string {
 
     html = processedLines.join('\n');
 
-    // 处理换行符
     html = html.replace(/\n/g, '<br>');
 
-    // 清理多余的br标签
     html = html.replace(/(<br>)+/g, '<br>');
     html = html.replace(/<p>(<br>)+/g, '<p>');
     html = html.replace(/(<br>)+<\/p>/g, '</p>');

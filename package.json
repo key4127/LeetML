@@ -32,12 +32,12 @@
     },
     "commands": [
       {
-        "command": "leetml.helloWorld",
-        "title": "Hello World"
-      },
-      {
         "command": "leetml.openDocument",
         "title": "Open Document"
+      },
+      {
+        "command": "leetml.executeSectionCommand",
+        "title": "Execute Section Command"
       }
     ]
   },
