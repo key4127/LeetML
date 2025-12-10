@@ -5,12 +5,12 @@ export const TREE_ITEMS = {
             children: [
                 {
                     label: 'MHA',
-                    command: 'leetml.startPractice',
+                    command: 'leetml.openDocument',
                     title: 'MHA1'
                 },
                 {
                     label: 'GQA',
-                    command: 'leetml.startPractice',
+                    command: 'leetml.openDocument',
                     title: 'GQA1'
                 }
             ],
@@ -23,12 +23,12 @@ export const TREE_ITEMS = {
             children: [
                 {
                     label: 'BCE',
-                    command: 'leetml.startPractice',
+                    command: 'leetml.openDocument',
                     title: 'BCE1'
                 },
                 {
                     label: 'CE',
-                    command: 'leetml.startPractice',
+                    command: 'leetml.openDocument',
                     title: 'CE1'
                 }
             ],

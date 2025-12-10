@@ -1,7 +1,5 @@
 .DS_Store
 
-.vscode/
-
 out
 dist
 node_modules

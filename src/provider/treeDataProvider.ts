@@ -27,7 +27,8 @@ class TreeDataProvider implements vscode.TreeDataProvider<vscode.TreeItem> {
 				const item = new vscode.TreeItem(child.label, vscode.TreeItemCollapsibleState.None);
 				item.command = {
 					command: child.command,
-					title: child.title
+					title: child.title,
+					arguments: [`${category}`]
 				};
 				return item;
 			});
