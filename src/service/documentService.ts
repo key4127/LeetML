@@ -28,7 +28,7 @@ export class DocumentService {
         try {
             const existingPanel = this.panels.get(docName);
             if (existingPanel) {
-                existingPanel.reveal(vscode.ViewColumn.One);
+                existingPanel.reveal();
                 return;
             }
 
