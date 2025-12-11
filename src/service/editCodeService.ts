@@ -47,29 +47,14 @@ export class EditCodeService {
         const key = `${mainTitle}_${sectionTitle}`;
 
         try {
-            if (!fs.existsSync(this.userCodesDir)) {
-                fs.mkdirSync(this.userCodesDir, { recursive: true });
-            }
+            const uri = vscode.Uri.parse(`leetml://workspace/${mainTitle}/${sectionTitle}.py`);
 
-            const fileName = `${mainTitle}-${sectionTitle}.py`.toLowerCase();
-            const filePath = path.join(this.userCodesDir, fileName);
-
-            let document: vscode.TextDocument;
-
-            if (fs.existsSync(filePath)) {
-                document = await vscode.workspace.openTextDocument(filePath);
-            } else {
-                const initialContent = this.getInitialCodeTemplate(mainTitle, sectionTitle);
-                fs.writeFileSync(filePath, initialContent, 'utf8');
-                document = await vscode.workspace.openTextDocument(filePath);
-            }
+            const document = await vscode.workspace.openTextDocument(uri);
 
             const editor = await vscode.window.showTextDocument(document, {
                 viewColumn: vscode.ViewColumn.One,
                 preserveFocus: false
             });
-
-            await this.setEditorLabel(editor, `${mainTitle} - ${sectionTitle}`);
 
             if (docName && this.documentService) {
                 this.documentService.movePanelToRight(docName);
@@ -99,24 +84,6 @@ export class EditCodeService {
         }
     }
 
-    private getInitialCodeTemplate(mainTitle: string, sectionTitle: string): string {
-        const safeMainTitle = mainTitle || 'Unknown';
-        const safeSectionTitle = sectionTitle || 'Unknown';
-
-        return `# ${safeMainTitle} - ${safeSectionTitle}
-def ${safeSectionTitle.replace(/\s+/g, '_')}_function():
-    """
-    Implementation for ${safeSectionTitle}
-    """
-    pass
-`;
-    }
-
-    private async setEditorLabel(editor: vscode.TextEditor, label: string) {
-        // 使用VS Code的私有API设置标签页名称（如果可用）
-        // 对于未命名文档，默认会显示"Untitled-X"，这里我们保持原样
-        // 用户可以通过配置隐藏或自定义标签页显示
-    }
 
     public dispose() {
         this.codeEditors.clear();
