@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
-import { getHtmlForWebview } from '../util/webview';
+import { getHtmlForWebview } from '../view/webview';
 import { EditCodeService } from '../type/interface';
 
 export class DocumentService {
@@ -42,20 +42,17 @@ export class DocumentService {
                     localResourceRoots: []
                 }
             );
-            // 设置webview的选项，让JavaScript可以访问docName
             panel.webview.options = {
                 enableScripts: true,
                 localResourceRoots: []
             };
 
-            // 在HTML中嵌入docName信息
             panel.webview.html = getHtmlForWebview(doc.getText(), true, docName);
 
-            // 处理webview消息
             const messageHandler = panel.webview.onDidReceiveMessage(
                 async (message) => {
                     switch (message.command) {
-                        case 'executeSectionCommand':
+                        case 'openCodeEditor':
                             if (this.editCodeService) {
                                 await this.editCodeService.editCode(message.mainTitle, message.sectionTitle, message.docName);
                             }

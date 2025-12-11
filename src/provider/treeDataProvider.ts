@@ -26,7 +26,7 @@ class TreeDataProvider implements vscode.TreeDataProvider<vscode.TreeItem> {
 			return root.children.map(child => {
 				const item = new vscode.TreeItem(child.label, vscode.TreeItemCollapsibleState.None);
 				item.command = {
-					command: child.command,
+					command: 'leetml.openDocument',
 					title: child.title,
 					arguments: [`${category}`]
 				};

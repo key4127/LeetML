@@ -13,7 +13,7 @@ export function activate(context: vscode.ExtensionContext) {
 	);
 	context.subscriptions.push(treeView);
 
-	const editCodeService = new EditCodeService();
+	const editCodeService = new EditCodeService(context.extensionPath);
 	const documentService = new DocumentService(context.extensionPath, editCodeService);
 	editCodeService.setDocumentService(documentService);
 
@@ -25,13 +25,13 @@ export function activate(context: vscode.ExtensionContext) {
 	);
 	context.subscriptions.push(openDocCommand);
 
-	const executeSectionCommand = vscode.commands.registerCommand(
-		'leetml.executeSectionCommand',
+	const openCodeEditorCommand = vscode.commands.registerCommand(
+		'leetml.openCodeEditor',
 		async (mainTitle: string, sectionTitle: string) => {
 		    await editCodeService.editCode(mainTitle, sectionTitle);
 	    }
     );
-	context.subscriptions.push(executeSectionCommand);
+	context.subscriptions.push(openCodeEditorCommand);
 
 	context.subscriptions.push({
 		dispose: () => editCodeService.dispose()

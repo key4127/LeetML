@@ -36,8 +36,8 @@
         "title": "Open Document"
       },
       {
-        "command": "leetml.executeSectionCommand",
-        "title": "Execute Section Command"
+        "command": "leetml.openCodeEditor",
+        "title": "Open Code Editor"
       }
     ]
   },

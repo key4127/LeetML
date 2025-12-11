@@ -17,7 +17,7 @@ export function getHtmlForWebview(markdownContent: string, includeButtons: boole
                         // 调用VS Code命令
                         const vscode = window.acquireVsCodeApi();
                         vscode.postMessage({
-                            command: 'executeSectionCommand',
+                            command: 'openCodeEditor',
                             mainTitle: mainTitle,
                             sectionTitle: sectionTitle,
                             docName: docName
@@ -152,7 +152,11 @@ export function convertMarkdownToHtml(markdownContent: string, includeButtons: b
     html = html.replace(/^#### (.*$)/gim, '<h4>$1</h4>');
     html = html.replace(/^### (.*$)/gim, '<h3>$1</h3>');
     if (includeButtons) {
-        html = html.replace(/^## (.*$)/gim, '<h2>$1</h2><div style="text-align: right; margin-bottom: 16px;"><button onclick="executeCommand(\'$1\')" style="background-color: var(--vscode-button-background); color: var(--vscode-button-foreground); border: 1px solid var(--vscode-button-border); padding: 4px 8px; border-radius: 3px; cursor: pointer;">执行</button></div>');
+        html = html.replace(/^## (.*$)/gim, (match, title) => {
+            const safeTitle = title || 'Unknown';
+            const escapedTitle = safeTitle.replace(/'/g, '\\\'').replace(/"/g, '\\"');
+            return `<h2>${safeTitle}</h2><div style="text-align: right; margin-bottom: 16px;"><button onclick="executeCommand('${escapedTitle}')" style="background-color: var(--vscode-button-background); color: var(--vscode-button-foreground); border: 1px solid var(--vscode-button-border); padding: 4px 8px; border-radius: 3px; cursor: pointer;">执行</button></div>`;
+        });
     } else {
         html = html.replace(/^## (.*$)/gim, '<h2>$1</h2>');
     }
