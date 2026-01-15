@@ -3,7 +3,6 @@ import * as path from 'path';
 import * as fs from 'fs';
 
 export default class FileSystemProvider implements vscode.FileSystemProvider {
-    // FileSystemProvider implementation
     private _onDidChangeFile = new vscode.EventEmitter<vscode.FileChangeEvent[]>();
     readonly onDidChangeFile = this._onDidChangeFile.event;
 
@@ -29,7 +28,6 @@ export default class FileSystemProvider implements vscode.FileSystemProvider {
             };
         }
 
-        // 如果文件不存在，返回默认的FileStat
         return {
             type: vscode.FileType.File,
             ctime: Date.now(),
@@ -61,7 +59,6 @@ export default class FileSystemProvider implements vscode.FileSystemProvider {
             return fs.readFileSync(realPath);
         }
 
-        // 如果文件不存在，创建初始内容
         const content = this.getInitialContent(uri);
         this.writeFile(uri, new TextEncoder().encode(content), { create: true, overwrite: true });
         return new TextEncoder().encode(content);

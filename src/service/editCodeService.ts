@@ -27,41 +27,33 @@ export class EditCodeService {
         const key = `${mainTitle || 'Unknown'}_${sectionTitle}`;
         const uri = vscode.Uri.parse(`leetml://workspace/${mainTitle}/${sectionTitle}.py`);
 
-        // 检查editor是否已经打开（通过URI检查所有打开的editor）
         const existingEditor = this.codeEditors.get(key);
         if (existingEditor) {
-            // 验证editor是否仍然有效
             const allEditors = vscode.window.visibleTextEditors;
             const stillOpen = allEditors.some(editor => editor.document.uri.toString() === uri.toString());
             
             if (stillOpen) {
-                // 切换到已打开的editor
                 await vscode.window.showTextDocument(existingEditor.document, {
                     viewColumn: vscode.ViewColumn.One,
                     preserveFocus: false
                 });
-                // 确保docs保持在右侧
                 if (docName && this.documentService) {
                     this.documentService.movePanelToRight(docName);
                 }
                 return;
             } else {
-                // Editor已被关闭，从Map中移除
                 this.codeEditors.delete(key);
             }
         }
 
-        // 检查是否在其他已打开的editor中
         const allEditors = vscode.window.visibleTextEditors;
         const editorWithSameUri = allEditors.find(editor => editor.document.uri.toString() === uri.toString());
         
         if (editorWithSameUri) {
-            // 如果文档已经在某个editor中打开，切换到它
             await vscode.window.showTextDocument(editorWithSameUri.document, {
                 viewColumn: vscode.ViewColumn.One,
                 preserveFocus: false
             });
-            // 确保docs保持在右侧
             if (docName && this.documentService) {
                 this.documentService.movePanelToRight(docName);
             }
@@ -85,22 +77,18 @@ export class EditCodeService {
 
             const document = await vscode.workspace.openTextDocument(uri);
 
-            // 在ViewColumn.One中打开文档，preview: false确保作为永久tab打开，不会替换其他editor
-            // 确保editor在左侧打开，不影响右侧的docs
             const editor = await vscode.window.showTextDocument(document, {
                 viewColumn: vscode.ViewColumn.One,
                 preserveFocus: false,
                 preview: false
             });
 
-            // 打开editor后，将对应的docs移到右侧
             if (docName && this.documentService) {
                 this.documentService.movePanelToRight(docName);
             }
 
             this.codeEditors.set(key, editor);
 
-            // 监听文档关闭事件，从Map中移除对应的editor引用
             const disposable = vscode.workspace.onDidCloseTextDocument((closedDoc) => {
                 if (closedDoc.uri.toString() === uri.toString()) {
                     this.codeEditors.delete(key);

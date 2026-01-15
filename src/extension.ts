@@ -21,7 +21,7 @@ export function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(
 		vscode.workspace.registerFileSystemProvider(
 			'leetml', 
-			new FileSystemProvider(context.extensionPath)
+			new FileSystemProvider(context.globalStorageUri.fsPath)
 		)
 	);
 
