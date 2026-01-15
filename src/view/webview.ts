@@ -4,6 +4,8 @@ export function getHtmlForWebview(markdownContent: string, includeButtons: boole
     let scriptTag = '';
     if (includeButtons) {
         scriptTag = `<script>
+                const vscode = window.acquireVsCodeApi();
+
                 function executeCommand(sectionTitle) {
                     try {
                         // 获取一级标题
@@ -15,7 +17,6 @@ export function getHtmlForWebview(markdownContent: string, includeButtons: boole
                         const docName = bodyElement ? bodyElement.getAttribute('data-docname') : '';
 
                         // 调用VS Code命令
-                        const vscode = window.acquireVsCodeApi();
                         vscode.postMessage({
                             command: 'openCodeEditor',
                             mainTitle: mainTitle,
