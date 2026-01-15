@@ -34,7 +34,7 @@ export class DocumentService {
 
             const doc = await vscode.workspace.openTextDocument(docPath);
             const panel = vscode.window.createWebviewPanel(
-                'markdownPreview',
+                'leetml.markdownPreview',
                 docName,
                 vscode.ViewColumn.One,
                 {
@@ -68,6 +68,37 @@ export class DocumentService {
 
         } catch (error) {
             vscode.window.showErrorMessage(`Failed to open document: ${error}`);
+        }
+    }
+
+    public async revive(panel: vscode.WebviewPanel, docName: string) {
+        const docPath = path.join(
+            this.extensionPath,
+            'resources',
+            'docs',
+            docName + '.md');
+
+        try {
+            const doc = await vscode.workspace.openTextDocument(docPath);
+
+            panel.webview.options = { enableScripts: true };
+            panel.webview.html = getHtmlForWebview(doc.getText(), true, docName);
+
+            panel.webview.onDidReceiveMessage(async (message) => {
+                if (message.command === 'openCodeEditor') {
+                    await this.editCodeService?.editCode(
+                        message.mainTitle,
+                        message.sectionTitle,
+                        message.docName
+                    );
+                }
+            })
+
+            this.panels.set(docName, panel);
+            panel.onDidDispose(() => this.panels.delete(docName));
+        } catch (error) {
+            vscode.window.showErrorMessage(`Failed to revive: ${error}`)
+            panel.dispose();
         }
     }
 }

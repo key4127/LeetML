@@ -5,8 +5,6 @@ import { DocumentService } from './service/documentService';
 import { EditCodeService } from './service/editCodeService';
 
 export function activate(context: vscode.ExtensionContext) {
-	console.log('Congratulations, your extension "leetml" is now active!');
-
 	const treeDataProvider = new TreeDataProvider();
 	const treeView = vscode.window.createTreeView(
 		'main',
@@ -17,6 +15,14 @@ export function activate(context: vscode.ExtensionContext) {
 	const editCodeService = new EditCodeService(context.extensionPath);
 	const documentService = new DocumentService(context.extensionPath, editCodeService);
 	editCodeService.setDocumentService(documentService);
+
+	context.subscriptions.push(
+		vscode.window.registerWebviewPanelSerializer('leetml.markdownPreview', {
+			async deserializeWebviewPanel(webviewPanel: vscode.WebviewPanel, state: any) {
+				await documentService.revive(webviewPanel, webviewPanel.title);
+			}
+		})
+	)
 
 	context.subscriptions.push(
 		vscode.workspace.registerFileSystemProvider(
@@ -44,6 +50,8 @@ export function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push({
 		dispose: () => editCodeService.dispose()
 	});
+
+	console.log('Congratulations, your extension "leetml" is now active!');
 }
 
 export function deactivate() {}

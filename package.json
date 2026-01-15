@@ -9,7 +9,10 @@
   "categories": [
     "Other"
   ],
-  "activationEvents": [],
+  "activationEvents": [
+    "onFileSystem:leetml",
+    "onWebviewPanel:leetml.markdownPreview"
+  ],
   "main": "./out/extension.js",
   "contributes": {
     "viewsContainers": {
