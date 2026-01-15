@@ -35,20 +35,8 @@ export class EditCodeService {
                 preview: false
             });
 
-            const actualViewColumn = vscode.window.activeTextEditor?.viewColumn;
-
             if (docName && this.documentService) {
                 this.documentService.movePanelToRight(docName);
-            }
-
-            if (actualViewColumn) {
-                await vscode.window.showTextDocument(
-                    vscode.window.activeTextEditor!.document, {
-                        viewColumn: actualViewColumn,
-                        preserveFocus: false,
-                        preview: false
-                    }
-                )
             }
         } catch (error) {
             vscode.window.showErrorMessage(`Failed to open code editor: ${error}`);
