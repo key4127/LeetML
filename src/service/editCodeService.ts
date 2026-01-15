@@ -34,10 +34,6 @@ export class EditCodeService {
                 preserveFocus: false,
                 preview: false
             });
-
-            if (docName && this.documentService) {
-                this.documentService.movePanelToRight(docName);
-            }
         } catch (error) {
             vscode.window.showErrorMessage(`Failed to open code editor: ${error}`);
         }
