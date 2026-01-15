@@ -14,7 +14,7 @@ export class DocumentService {
     public movePanelToRight(docName: string) {
         const panel = this.panels.get(docName);
         if (panel) {
-            panel.reveal(vscode.ViewColumn.Two);
+            panel.reveal(vscode.ViewColumn.Two, true);
         }
     }
 

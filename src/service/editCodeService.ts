@@ -24,93 +24,36 @@ export class EditCodeService {
             throw new Error('sectionTitle is required and must be a string');
         }
 
-        const key = `${mainTitle || 'Unknown'}_${sectionTitle}`;
         const uri = vscode.Uri.parse(`leetml://workspace/${mainTitle}/${sectionTitle}.py`);
 
-        const existingEditor = this.codeEditors.get(key);
-        if (existingEditor) {
-            const allEditors = vscode.window.visibleTextEditors;
-            const stillOpen = allEditors.some(editor => editor.document.uri.toString() === uri.toString());
-            
-            if (stillOpen) {
-                await vscode.window.showTextDocument(existingEditor.document, {
-                    viewColumn: vscode.ViewColumn.One,
-                    preserveFocus: false
-                });
-                if (docName && this.documentService) {
-                    this.documentService.movePanelToRight(docName);
-                }
-                return;
-            } else {
-                this.codeEditors.delete(key);
-            }
-        }
-
-        const allEditors = vscode.window.visibleTextEditors;
-        const editorWithSameUri = allEditors.find(editor => editor.document.uri.toString() === uri.toString());
-        
-        if (editorWithSameUri) {
-            await vscode.window.showTextDocument(editorWithSameUri.document, {
-                viewColumn: vscode.ViewColumn.One,
-                preserveFocus: false
-            });
-            if (docName && this.documentService) {
-                this.documentService.movePanelToRight(docName);
-            }
-            this.codeEditors.set(key, editorWithSameUri);
-            return;
-        }
-
         try {
-            await this.performAtomicEditCode(mainTitle, sectionTitle, docName);
+            const doc = await vscode.workspace.openTextDocument(uri);
 
-        } catch (error) {
-            vscode.window.showErrorMessage(`Failed to open code editor: ${error}`);
-        }
-    }
-
-    private async performAtomicEditCode(mainTitle: string, sectionTitle: string, docName?: string) {
-        const key = `${mainTitle}_${sectionTitle}`;
-
-        try {
-            const uri = vscode.Uri.parse(`leetml://workspace/${mainTitle}/${sectionTitle}.py`);
-
-            const document = await vscode.workspace.openTextDocument(uri);
-
-            const editor = await vscode.window.showTextDocument(document, {
+            await vscode.window.showTextDocument(doc, {
                 viewColumn: vscode.ViewColumn.One,
                 preserveFocus: false,
                 preview: false
             });
 
+            const actualViewColumn = vscode.window.activeTextEditor?.viewColumn;
+
             if (docName && this.documentService) {
                 this.documentService.movePanelToRight(docName);
             }
 
-            this.codeEditors.set(key, editor);
-
-            const disposable = vscode.workspace.onDidCloseTextDocument((closedDoc) => {
-                if (closedDoc.uri.toString() === uri.toString()) {
-                    this.codeEditors.delete(key);
-                    disposable.dispose();
-                }
-            });
-
-        } catch (error) {
-            try {
-                await vscode.commands.executeCommand('workbench.action.closeActiveEditor');
-
-                await vscode.commands.executeCommand('vscode.setEditorLayout', {
-                    orientation: 0,
-                    groups: [{ size: 1.0 }]
-                });
-            } catch (recoveryError) {
-                console.warn('Failed to recover from error:', recoveryError);
+            if (actualViewColumn) {
+                await vscode.window.showTextDocument(
+                    vscode.window.activeTextEditor!.document, {
+                        viewColumn: actualViewColumn,
+                        preserveFocus: false,
+                        preview: false
+                    }
+                )
             }
-            throw error;
+        } catch (error) {
+            vscode.window.showErrorMessage(`Failed to open code editor: ${error}`);
         }
     }
-
 
     public dispose() {
         this.codeEditors.clear();
